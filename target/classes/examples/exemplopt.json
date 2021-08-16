@@ -1,0 +1,14 @@
+{
+  "cidade": "Pelotas",
+  "estado": "RS",
+  "condicao_tempo": "chuva",
+  "previsao": [
+    {
+      "data": "26/07",
+      "diadasemana": "Seg",
+      "maxima": 18,
+      "minima": 10,
+      "condicao": "chuva"
+    }
+  ]
+}

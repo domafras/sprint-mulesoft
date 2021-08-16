@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd">
+	<sub-flow name="implementation-final-flow"
+		doc:id="5d9bbfc7-dc89-4163-9f04-79179c0a00fa">
+		<flow-ref doc:name="Recuperar Variáveis de Entrada"
+			doc:id="5d4a8a78-95fd-4425-aac5-34ae8ed91d76"
+			name="recuperar-variaveis-de-entrada" />
+		<flow-ref doc:name="Requisição e Filtragem de Mensagem"
+			doc:id="1114bac1-c61e-4707-9802-9642e54ab68b"
+			name="realizar-request-e-filtrar-mensagem" />
+		<flow-ref doc:name="Salvar Payload CSV" doc:id="fcd22fff-1d62-47ad-9c3c-69e3ad5b4ae6" name="salvar-payload-csv"/>
+		<flow-ref doc:name="Enviar CSV FTP" doc:id="f8ca356f-b7cb-4bc5-b4cc-28ec35f23ed0" name="enviar-csv-ftp"/>
+		<ee:transform doc:name="Transform Message"
+			doc:id="23d8b095-e0f5-4247-bc8c-cf89e4f73bdb">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	cidade: vars.cidade,
+	estado: vars.estado,
+	condicao_tempo: vars.condicao,
+	previsao: vars.previsao
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="recuperar-variaveis-de-entrada"
+		doc:id="f12dccad-5403-4dd7-beb0-e4749ff7a8a7">
+		<set-variable value="#[message.attributes.headers.cidade]" doc:name="cidade"
+			doc:id="3e270542-98a1-4795-b8c8-eff6d08a622c" variableName="cidade" />
+		<set-variable value="#[message.attributes.headers.estado]" doc:name="estado"
+			doc:id="065216f5-0ae9-466d-8f02-8aedbd02b9c7" variableName="estado" />
+	</sub-flow>
+	<sub-flow name="realizar-request-e-filtrar-mensagem"
+		doc:id="2d08f413-9295-47e2-80e8-e494be4ef45c">
+		<http:request method="GET" doc:name="Request"
+			doc:id="77748386-d32e-4d93-9b72-356bf2074b6d"
+			config-ref="HTTP_Request_configuration" path="/findPredictTimeWeek" >
+			<http:headers ><![CDATA[#[output application/json
+---
+{
+	"cidade" : "Pelotas",
+	"estado" : "RS"
+}]]]></http:headers>
+		</http:request>
+		<set-variable value="#[payload.condicao_tempo]" doc:name="Set Variable Condicao" doc:id="19f8ede8-f4ca-4e17-861f-94758e2080d3" variableName="condicao" />
+		<logger level="INFO" doc:name="Logger" doc:id="91ecb922-60f5-42f1-931d-bcba1543524b" message="#[payload]" />
+		<try doc:name="Try" doc:id="bc6e5557-4751-4923-b116-112c1fcd6bf2">
+			<foreach doc:name="For Each"
+				doc:id="34c0239e-1cde-4f7b-b7fa-f90c258bd171">
+				<ee:transform doc:name="Transform Message"
+					doc:id="e892adfd-0f7b-4a18-9123-0f1a5a20905f">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+
+---
+
+previsao: payload.previsao map(item, index) -> {
+    data: item.date,
+    diadasemana: item.weekday,
+    maxima: item.max,
+    minima: item.min,
+    condicao: 
+        if(item.condition == "rain") 
+            "chuva" 
+        else if (item.condition == "clear_day") 
+            "dia_limpo" 
+        else  "dia_nublado"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="#[payload.previsao]"
+					doc:name="Set Variable Previsao"
+					doc:id="da70508d-afbb-468f-b456-ae3bb0773cf3"
+					variableName="previsao" />
+			</foreach>
+			<error-handler>
+				<on-error-continue enableNotifications="true"
+					logException="true" doc:name="On Error Continue"
+					doc:id="5046ee56-daeb-40df-acc2-a910b4bc2b9a">
+					<ee:transform doc:name="Transform Message"
+						doc:id="18a0252e-5c12-4a41-9645-8822700e651f">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"mensagem":error.description
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<set-payload value="#[vars.previsao]" doc:name="Set Payload"
+			doc:id="0d540565-e231-4899-a722-b18dbbec14c5" />
+		<logger level="INFO" doc:name="Logger"
+			doc:id="ec5153bf-c642-44c7-ae4a-9f8b8ef7ffdf" message="#[payload]" />
+	</sub-flow>
+	<sub-flow name="salvar-payload-csv" doc:id="a128892f-e964-47b4-8a67-035fcfcd9c0f" >
+		<logger level="INFO" doc:name="Logger" doc:id="f95523dd-54aa-4ad4-a573-3c8a85e8c48e" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="f2bb5cbe-61e8-4cde-aaf4-90eca7c20b3b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<file:write doc:name="Write" doc:id="b4d93a5b-66e4-4459-ab16-bf44fbdd3acb" config-ref="File_Config" path="arquivo.csv" />
+	</sub-flow>
+	<sub-flow name="enviar-csv-ftp" doc:id="1a0a20ea-fe0a-4571-93c4-638ddf991266" >
+		<logger level="INFO" doc:name="Logger" doc:id="96a4ee7a-ee33-4600-8ffd-206251268207" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="3f2d1cb7-31fb-470f-8334-d29af3d16741" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ftp:write doc:name="Write" doc:id="c88e8c18-35d0-4ee0-b9e2-b657e5518b40" config-ref="FTP_Config" path="arquivo.csv"/>
+	</sub-flow>
+</mule>

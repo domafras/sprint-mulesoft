@@ -1,0 +1,12 @@
+https:
+  basepath: "/"
+  path: "/mocking/api/v1/sources/exchange/assets/a01564f9-a164-4d49-b3f5-31123c054acc/api-previsao-do-tempo/1.0.1/m/findPredictTimeWeek"
+  port: "443"
+  host: "anypoint.mulesoft.com"
+  
+ftp:
+  directory: "/tmp"
+  host: "files.000webhost.com"
+  port: "21"
+  usuario: "mulesoftleo"
+  senha: "#c7@sfq3nnvOzujNmV!Z"

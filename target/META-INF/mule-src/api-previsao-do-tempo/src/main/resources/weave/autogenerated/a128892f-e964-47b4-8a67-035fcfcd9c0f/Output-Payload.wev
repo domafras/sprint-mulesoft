@@ -1,0 +1,6 @@
+%dw 2.0
+
+type auto_a128892f_e964_47b4_8a67_035fcfcd9c0f_Output_Payload = Array<{|  data: String,   diadasemana: String,   maxima: Number,   minima: Number,   condicao: String|}> {"isQuotedString": "false",
+"header": "true",
+"headerLineNumber": "0"}
+

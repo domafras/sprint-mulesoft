@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd">
+	<file:config name="File_Config" doc:name="File Config"
+		doc:id="927c5a2e-0394-46ad-9530-8ed6ef6bc204">
+		<file:connection
+			workingDir="C:\Users\User\Desktop\Projeto Final" />
+	</file:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="63e38311-3fca-4f2e-b9fa-6637a3beac39" file="properties.yaml" />
+	<configuration doc:name="Configuration" doc:id="61f8d877-fb03-4513-9b4c-2cde72f1a784" defaultErrorHandler-ref="globalError_Handler" />
+	<ftp:config name="FTP_Config" doc:name="FTP Config" doc:id="09989e7d-a516-4a18-8f44-74b6f7737077" >
+		<ftp:connection host="${ftp.host}" username="${ftp.usuario}" password="${ftp.senha}" port="${ftp.port}" workingDir="${ftp.directory}"/>
+	</ftp:config>
+	<error-handler name="globalError_Handler"
+		doc:id="fc9dc9b0-68ec-4794-8dd6-e9aba1471402">
+		<on-error-propagate enableNotifications="true"
+			logException="true" doc:name="On Error Propagate"
+			doc:id="0b96385d-fd11-4e24-b8d3-12544d9b8e89">
+			<ee:transform doc:name="Transform Message"
+				doc:id="82092616-d0c7-4bc6-bb3e-95930d6d121b">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"mensagem":error.description
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-propagate>
+	</error-handler>
+
+	<http:request-config
+		name="HTTP_Request_configuration"
+		doc:name="HTTP Request configuration"
+		doc:id="8db2e3b4-7355-41d8-b881-9b787ef20685" basePath="/mocking/api/v1/sources/exchange/assets/a01564f9-a164-4d49-b3f5-31123c054acc/api-previsao-do-tempo/1.0.1/m">
+		<http:request-connection host="anypoint.mulesoft.com"
+			port="443" protocol="HTTPS"/>
+	</http:request-config>
+</mule>
