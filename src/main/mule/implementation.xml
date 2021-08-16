@@ -77,8 +77,8 @@ previsao: payload.previsao map(item, index) -> {
         if(item.condition == "rain") 
             "chuva" 
         else if (item.condition == "clear_day") 
-            "dia_limpo" 
-        else  "dia_nublado"
+            "tempo_limpo" 
+        else  "tempo_nublado"
 }]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>

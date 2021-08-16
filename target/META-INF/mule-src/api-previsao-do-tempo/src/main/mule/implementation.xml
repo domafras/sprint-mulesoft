@@ -38,9 +38,9 @@ output application/json
 	</sub-flow>
 	<sub-flow name="recuperar-variaveis-de-entrada"
 		doc:id="f12dccad-5403-4dd7-beb0-e4749ff7a8a7">
-		<set-variable value="#[attributes.headers.cidade]" doc:name="cidade"
+		<set-variable value="#[message.attributes.headers.cidade]" doc:name="cidade"
 			doc:id="3e270542-98a1-4795-b8c8-eff6d08a622c" variableName="cidade" />
-		<set-variable value="#[attributes.headers.estado]" doc:name="estado"
+		<set-variable value="#[message.attributes.headers.estado]" doc:name="estado"
 			doc:id="065216f5-0ae9-466d-8f02-8aedbd02b9c7" variableName="estado" />
 	</sub-flow>
 	<sub-flow name="realizar-request-e-filtrar-mensagem"
@@ -77,8 +77,8 @@ previsao: payload.previsao map(item, index) -> {
         if(item.condition == "rain") 
             "chuva" 
         else if (item.condition == "clear_day") 
-            "dia_limpo" 
-        else  "dia_nublado"
+            "tempo_limpo" 
+        else  "tempo_nublado"
 }]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
