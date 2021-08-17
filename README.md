@@ -86,4 +86,4 @@ Após clicar 'SEND' no Postman:
 ### Contato e licença
 Sem restrições ao uso, modificações e distribuição do código fonte.
 
-Feito com ❤️ por [Leonardo Mafra](https://www.linkedin.com/in/leomafra/),  [Juliane Maran]() e [William Bernardes]().
+Feito com ❤️ por [Leonardo Mafra](https://www.linkedin.com/in/leomafra/),  [Juliane Maran](https://www.linkedin.com/in/juliane-maran-168b73133/) e [William Bernardes](https://www.linkedin.com/in/williambernardesf/).
